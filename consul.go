@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/golang/glog"
 	consulapi "github.com/hashicorp/consul/api"
 )
@@ -33,7 +34,7 @@ func (k2c *kube2consul) registerEndpoint(e Endpoint) {
 	service := &consulapi.AgentService{
 		Service: e.Name,
 		Port:    int(e.Port),
-		Tags:    []string{consulTag},
+		Tags:    append([]string{consulTag}, e.Labels...),
 	}
 
 	reg := &consulapi.CatalogRegistration{
