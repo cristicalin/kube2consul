@@ -8,11 +8,15 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+	"strings"
 
 	"github.com/gorilla/mux"
 
 	"github.com/coreos/pkg/flagutil"
-	"github.com/golang/glog"
+	// "github.com/golang/glog"
+	glog "github.com/Sirupsen/logrus"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 
 	consulapi "github.com/hashicorp/consul/api"
 
@@ -45,6 +49,9 @@ type cliOpts struct {
 	lockKey      string
 	noHealth     bool
 	consulTag    string
+	logFile      string
+	logFormat    string
+        logLevel     string
 }
 
 func init() {
@@ -58,6 +65,9 @@ func init() {
 	flag.StringVar(&opts.lockKey, "lock-key", "locks/kube2consul/.lock", "Key used for locking")
 	flag.BoolVar(&opts.noHealth, "no-health", false, "Disable endpoint /health on port 8080")
 	flag.StringVar(&opts.consulTag, "consul-tag", "kube2consul", "Tag setted on services to identify services managed by kube2consul in Consul")
+	flag.StringVar(&opts.logFile, "log-file", "/var/log/kube2consul.log", "The log file to log to")
+	flag.StringVar(&opts.logFormat, "log-format", "text", "The format of the logs, default=text")
+	flag.StringVar(&opts.logLevel, "log-level", "debug", "The log level ([debug],info,warning,error)")
 }
 
 func inSlice(value string, slice []string) bool {
@@ -116,7 +126,17 @@ func kubernetesCheck() error {
 
 func main() {
 	// parse flags
-	flag.Parse()
+	// flag.Parse()
+	viper.SetEnvPrefix("K2C")
+	replacer := strings.NewReplacer("-", "_")
+	viper.SetEnvKeyReplacer(replacer)
+	viper.AutomaticEnv()
+	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
+	pflag.Parse()
+	viper.BindPFlags(pflag.CommandLine)
+
+	InitLogging()
+
 	err := flagutil.SetFlagsFromEnv(flag.CommandLine, "K2C")
 	if err != nil {
 		glog.Fatalf("Cannot set flags from env: %v", err)

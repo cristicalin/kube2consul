@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/golang/glog"
+	// "github.com/golang/glog"
+	glog "github.com/Sirupsen/logrus"
 
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
@@ -30,8 +31,8 @@ func newKubeClient(apiserver string, kubeconfig string) (kubeClient kubernetes.I
 		if len(config.BearerToken) > 0 {
 			tokenPresent = true
 		}
-		glog.V(2).Infof("service account token present: %v", tokenPresent)
-		glog.V(2).Infof("service host: %s", config.Host)
+		glog.Infof("service account token present: %v", tokenPresent)
+		glog.Infof("service host: %s", config.Host)
 		if kubeClient, err = kubernetes.NewForConfig(config); err != nil {
 			return nil, err
 		}

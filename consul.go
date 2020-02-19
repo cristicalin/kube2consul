@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 
-	"github.com/golang/glog"
+	// "github.com/golang/glog"
+	glog "github.com/Sirupsen/logrus"
+
 	consulapi "github.com/hashicorp/consul/api"
 )
 
